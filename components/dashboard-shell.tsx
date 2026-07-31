@@ -65,11 +65,15 @@ export function DashboardShell({ children, name, image, role }: DashboardShellPr
       <aside className="hidden md:flex md:w-64 md:flex-col border-r bg-card px-4 py-6 justify-between shrink-0">
         <div className="space-y-6">
           <div className="flex flex-col items-center text-center gap-2 px-2 py-2">
+            <Link href="/" className="text-xs text-muted-foreground hover:text-primary transition-colors">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg overflow-hidden bg-primary text-primary-foreground shadow">
               <img src="/Logo.jpeg" alt="Logo" className="h-full w-full object-cover" />
             </div>
+</Link>
             <div>
+              <Link href="/" className="text-xs text-muted-foreground hover:text-primary transition-colors">
               <h2 className="font-semibold text-sm">Future Robotics</h2>
+              </Link>
               <p className="text-xs text-muted-foreground capitalize flex items-center justify-center gap-1">
                 <ShieldCheck className="h-3 w-3 text-primary" /> {role}
               </p>
