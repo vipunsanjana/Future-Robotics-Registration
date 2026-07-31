@@ -42,8 +42,8 @@ GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
 
 # NextAuth Configuration
-NEXTAUTH_URL="http://localhost:3000" 
-NEXTAUTH_SECRET="your_random_32_character_secret"
+NEXTAUTH_URL="http://localhost:5173" 
+NEXTAUTH_URL=<your-nextauth-url>
 
 # MongoDB Database (if applicable)
 MONGODB_URI="your_mongodb_connection_string"
