@@ -64,7 +64,6 @@ export default function DashboardPage() {
         <p className="text-xs sm:text-sm text-muted-foreground">Overview of registrations.</p>
       </div>
 
-      {/* Metrics Grid: 1 col on mobile, 2 on tablet, 3 on desktop */}
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((c) => (
           <Card key={c.label} className="transition-all hover:shadow-md">
@@ -79,7 +78,6 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Charts Grid: Stacks vertically on mobile, side-by-side on large screens */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
           <CardHeader>

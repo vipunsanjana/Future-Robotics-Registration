@@ -25,13 +25,13 @@ function LoginContent() {
       <div className="absolute left-1/2 top-1/4 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
       <Card className="relative w-full max-w-md border-border/60 shadow-xl">
         <CardHeader className="space-y-3 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg overflow-hidden bg-primary text-primary-foreground">
-              <img
-                src="/Logo.jpeg"
-                alt="Future Robotics Academy Logo"
-                className="h-full w-full object-cover"
-              />
-            </div>
+          <div className="flex h-12 w-12 mx-auto items-center justify-center rounded-lg overflow-hidden bg-primary text-primary-foreground">
+            <img
+              src="/Logo.jpeg"
+              alt="Future Robotics Academy Logo"
+              className="h-full w-full object-cover"
+            />
+          </div>
           <CardTitle className="text-2xl">Welcome to Future Robotics</CardTitle>
           <CardDescription>
             Sign in with your Google account to access the dashboard.

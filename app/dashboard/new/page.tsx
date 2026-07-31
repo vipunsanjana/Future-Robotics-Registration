@@ -71,22 +71,22 @@ export default function NewRegistrationPage() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl px-2 sm:px-0">
         <Card className="border-primary/30">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
               <CheckCircle2 className="h-8 w-8" />
             </div>
-            <CardTitle className="text-2xl">Registration Successful!</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-xl sm:text-2xl">Registration Successful!</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Document <span className="font-mono font-semibold text-foreground">{success.documentNo}</span> has been created.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border bg-secondary/30 p-4 text-sm">
+            <div className="rounded-lg border bg-secondary/30 p-4 text-xs sm:text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <span className="text-muted-foreground">Student:</span><span className="font-medium">{success.name}</span>
-                <span className="text-muted-foreground">Course:</span><span className="font-medium">{success.course}</span>
+                <span className="text-muted-foreground">Student:</span><span className="font-medium truncate">{success.name}</span>
+                <span className="text-muted-foreground">Course:</span><span className="font-medium truncate">{success.course}</span>
                 <span className="text-muted-foreground">Reg No:</span><span className="font-medium">{success.regNo}</span>
                 <span className="text-muted-foreground">Amount:</span><span className="font-medium">LKR {success.amount.toLocaleString()}</span>
                 <span className="text-muted-foreground">Mode:</span><span className="font-medium">{success.mode}</span>
@@ -95,11 +95,11 @@ export default function NewRegistrationPage() {
             <Button className="w-full" size="lg" onClick={() => downloadRegistrationPdf(success)}>
               <Download className="mr-2 h-5 w-5" /> Download PDF Receipt
             </Button>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={() => { setSuccess(null); setForm({ ...form, name: "", phone: "", regNo: "", description: "" }); }}>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" className="w-full sm:flex-1" onClick={() => { setSuccess(null); setForm({ ...form, name: "", phone: "", regNo: "", description: "" }); }}>
                 New Registration
               </Button>
-              <Button variant="outline" className="flex-1" onClick={() => router.push("/dashboard/registrations")}>
+              <Button variant="outline" className="w-full sm:flex-1" onClick={() => router.push("/dashboard/registrations")}>
                 View All
               </Button>
             </div>
@@ -110,62 +110,62 @@ export default function NewRegistrationPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">New Registration</h1>
-        <p className="text-sm text-muted-foreground">Fill in the student details and generate a PDF receipt.</p>
+    <div className="mx-auto max-w-2xl px-2 sm:px-0 space-y-6">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">New Registration</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground">Fill in the student details and generate a PDF receipt.</p>
       </div>
 
       {/* Mode selector */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => setMode("Normal")}
-          className={`rounded-xl border-2 p-4 text-left transition-all ${mode === "Normal" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+          className={`rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all ${mode === "Normal" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
         >
-          <div className="mb-2 flex items-center gap-2">
-            <Bot className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Normal Course</span>
-            {mode === "Normal" && <Badge className="ml-auto">Selected</Badge>}
+          <div className="mb-1.5 flex items-center gap-2">
+            <Bot className="h-5 w-5 text-primary shrink-0" />
+            <span className="font-semibold text-sm sm:text-base">Normal Course</span>
+            {mode === "Normal" && <Badge className="ml-auto text-[10px]">Selected</Badge>}
           </div>
-          <p className="text-sm text-muted-foreground">Live sessions with attendance, assignments, and a final project.</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Live sessions with attendance, assignments, and a final project.</p>
         </button>
         <button
           type="button"
           onClick={() => setMode("Recording")}
-          className={`rounded-xl border-2 p-4 text-left transition-all ${mode === "Recording" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+          className={`rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all ${mode === "Recording" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
         >
-          <div className="mb-2 flex items-center gap-2">
-            <PlayCircle className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Recording Course</span>
-            {mode === "Recording" && <Badge className="ml-auto">Selected</Badge>}
+          <div className="mb-1.5 flex items-center gap-2">
+            <PlayCircle className="h-5 w-5 text-primary shrink-0" />
+            <span className="font-semibold text-sm sm:text-base">Recording Course</span>
+            {mode === "Recording" && <Badge className="ml-auto text-[10px]">Selected</Badge>}
           </div>
-          <p className="text-sm text-muted-foreground">Self-paced access to recorded lectures and materials.</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Self-paced access to recorded lectures and materials.</p>
         </button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Student Details</CardTitle>
+          <CardTitle className="text-base sm:text-lg">Student Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="name">Student Name</Label>
                 <Input id="name" name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" name="phone" value={form.phone} onChange={handleChange} required placeholder="+94 77 123 4567" />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="regNo">Registration Number</Label>
                 <Input id="regNo" name="regNo" value={form.regNo} onChange={handleChange} required placeholder="FR-2025-001" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="course">Course</Label>
                 <select
                   id="course"
@@ -181,17 +181,17 @@ export default function NewRegistrationPage() {
                 </select>
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="amount">Amount (LKR)</Label>
                 <Input id="amount" name="amount" type="number" min="1" step="1" value={form.amount} onChange={handleChange} required placeholder="15000" />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="date">Registration Date</Label>
                 <Input id="date" name="date" type="date" value={form.date} onChange={handleChange} required />
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" name="description" value={form.description} onChange={handleChange} required placeholder="Course fee for Robotics Fundamentals - Month 1" rows={3} />
             </div>
