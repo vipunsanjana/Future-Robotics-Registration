@@ -2,7 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { findUserByEmail } from "./data";
 
-const timeoutMinutes = Number(process.env.SESSION_TIMEOUT_MINUTES!);
+const timeoutMinutes = Number(process.env.SESSION_TIMEOUT_MINUTES ?? 10);
 const timeoutSeconds = timeoutMinutes * 60;
 
 export const authOptions: NextAuthOptions = {
@@ -12,9 +12,12 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
-  session: { 
+  session: {
     strategy: "jwt",
-    maxAge: timeoutSeconds, 
+    maxAge: timeoutSeconds,
+    // 0 = never silently extend the session on activity.
+    // The 10 minutes is a hard, absolute cutoff from sign-in time.
+    updateAge: 0,
   },
   jwt: {
     maxAge: timeoutSeconds,
@@ -35,6 +38,7 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
+      // On initial sign-in, `user` is present — stamp the issued time.
       if (user?.email) {
         const dbUser = await findUserByEmail(user.email);
         if (dbUser) {
@@ -43,10 +47,26 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.name = dbUser?.name ?? user.name;
         token.image = dbUser?.image ?? user.image;
+        token.iat = Math.floor(Date.now() / 1000);
       }
+
+      // Hard expiry check on every request that decodes the token.
+      // (maxAge already does this at the cookie/JWT level, but this
+      // makes the cutoff explicit and lets us kill the token outright.)
+      const issuedAt = (token.iat as number) ?? 0;
+      const now = Math.floor(Date.now() / 1000);
+      if (now - issuedAt > timeoutSeconds) {
+        return {}; // empty token -> treated as unauthenticated
+      }
+
       return token;
     },
     async session({ session, token }) {
+      // If jwt() returned an empty/expired token, don't populate session.user.
+      if (!token || !token.email) {
+        return { ...session, user: undefined, expires: session.expires };
+      }
+
       if (session.user) {
         (session.user as { role?: string }).role = (token.role as string) || "manager";
         (session.user as { email?: string }).email = token.email as string;

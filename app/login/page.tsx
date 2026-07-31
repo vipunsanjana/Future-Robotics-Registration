@@ -1,9 +1,10 @@
+// app/login/page.tsx
 "use client";
 
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
-import { Cpu, Mail, ArrowLeft, ShieldAlert } from "lucide-react";
+import { useEffect, useState, Suspense } from "react";
+import { Mail, ArrowLeft, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
@@ -15,10 +16,26 @@ function LoginContent() {
   const error = params.get("error");
   const [loading, setLoading] = useState(false);
 
+  const { status } = useSession();
+
+  // If a valid (non-expired) session already exists, skip straight past login.
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace(callbackUrl);
+    }
+  }, [status, callbackUrl, router]);
+
   const handleGoogle = async () => {
     setLoading(true);
     await signIn("google", { callbackUrl });
   };
+
+  // Avoid flashing the login form while session status is being resolved,
+  // and avoid rendering it at all once we know we're authenticated
+  // (the effect above will redirect).
+  if (status === "loading" || status === "authenticated") {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
