@@ -1,0 +1,62 @@
+# Future Robotics Academy - Registration System
+
+A modern, secure web application built to manage student registrations, generate PDF receipts, and handle admin/manager accounts for Future Robotics Academy.
+
+## 🚀 Tech Stack
+
+* **Framework:** Next.js (App Router)
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS & shadcn/ui
+* **Authentication:** NextAuth.js (Google Provider)
+* **Database:** MongoDB
+* **PDF Generation:** jsPDF
+
+## ✨ Features
+
+* **Secure Authentication:** Google OAuth login with role-based access control (Admin vs. Manager).
+* **User Management:** Admins can add, edit, demote, promote, or remove staff accounts.
+* **Registration Dashboard:** Search, filter (Normal/Recording), and manage student registrations.
+* **Automated PDFs:** One-click PDF receipt generation complete with company branding.
+* **Real-time Stats:** Dashboard overview of total revenue and course distributions.
+
+## 🛠️ Getting Started
+
+### 1. Prerequisites
+Make sure you have Node.js installed on your machine. You will also need a MongoDB database and Google Cloud Console credentials.
+
+### 2. Installation
+Clone the repository and install the dependencies:
+
+```bash
+npm install
+
+```
+
+### 3. Environment Variables
+
+Create a `.env.local` file in the root directory and add your secret keys. **Never commit this file to GitHub.**
+
+```env
+# Google OAuth Credentials
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000" 
+NEXTAUTH_SECRET="your_random_32_character_secret"
+
+# MongoDB Database (if applicable)
+MONGODB_URI="your_mongodb_connection_string"
+
+```
+
+### 4. Run the Development Server
+
+Start the local development server:
+
+```bash
+npm run dev
+
+```
+
+Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
