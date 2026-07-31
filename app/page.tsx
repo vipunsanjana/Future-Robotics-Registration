@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AuthCta } from "@/components/auth-cta";
 import {
   Bot,
   ShieldCheck,
   PlayCircle,
-  Rocket, 
+  Rocket,
   GraduationCap,
-  ArrowRight,
   Clock,
   Wifi,
 } from "lucide-react";
@@ -37,13 +37,13 @@ function getCourseImageUrl(name: string) {
     return "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80";
   }
   if (n.includes("c++")) {
-    return "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80"; // Dedicated C++ systems architecture display
+    return "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80";
   }
   if (n.includes("cybersecurity")) {
-    return "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80"; // Encryption shield & security
+    return "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80";
   }
   if (n.includes("ai & ml")) {
-    return "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80"; // Artificial intelligence neural cluster graphics
+    return "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=600&q=80";
   }
   if (n.includes("esp32")) {
     return "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80";
@@ -51,7 +51,7 @@ function getCourseImageUrl(name: string) {
   if (n.includes("industrial plc")) {
     return "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=600&q=80";
   }
-  return "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80"; 
+  return "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80";
 }
 
 const features = [
@@ -114,9 +114,7 @@ export default function Home() {
             <Link href="/#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About</Link>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button size="sm">Get Started <ArrowRight className="ml-1 h-4 w-4" /></Button>
-            </Link>
+            <AuthCta size="sm" loggedOutLabel="Get Started" />
           </div>
         </div>
       </header>
@@ -139,11 +137,12 @@ export default function Home() {
               beginner to builder. Register online, get your payment receipt instantly, and join the next generation of engineers.
             </p>
             <div className="animate-fade-up mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row" style={{ animationDelay: "0.15s" }}>
-              <Link href="/login">
-                <Button size="lg" className="glow">
-                  Register for a Course <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+              <AuthCta
+                size="lg"
+                className="glow"
+                loggedOutLabel="Register for a Course"
+                loggedInLabel="Go to Dashboard"
+              />
               <Link href="/#courses">
                 <Button size="lg" variant="outline">Explore Courses</Button>
               </Link>
@@ -192,9 +191,9 @@ export default function Home() {
                   className="group flex flex-col overflow-hidden border-none shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
                 >
                   <div className="relative h-40 w-full overflow-hidden bg-muted">
-                    <img 
-                      src={imageUrl} 
-                      alt={c.name} 
+                    <img
+                      src={imageUrl}
+                      alt={c.name}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
@@ -283,13 +282,13 @@ export default function Home() {
       </footer>
 
       {/* Floating WhatsApp Button */}
-      <a
+      
         href="https://wa.me/94760944206?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20Future%20Robotics%20Academy%20courses!"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
         aria-label="Chat on WhatsApp"
-      >
+      <a>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

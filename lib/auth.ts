@@ -15,8 +15,6 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: timeoutSeconds,
-    // 0 = never silently extend the session on activity.
-    // The 10 minutes is a hard, absolute cutoff from sign-in time.
     updateAge: 0,
   },
   jwt: {
@@ -38,7 +36,7 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user }) {
-      // On initial sign-in, `user` is present — stamp the issued time.
+      // On initial sign-in, `user` is present — stamp issue time + role.
       if (user?.email) {
         const dbUser = await findUserByEmail(user.email);
         if (dbUser) {
@@ -50,9 +48,7 @@ export const authOptions: NextAuthOptions = {
         token.iat = Math.floor(Date.now() / 1000);
       }
 
-      // Hard expiry check on every request that decodes the token.
-      // (maxAge already does this at the cookie/JWT level, but this
-      // makes the cutoff explicit and lets us kill the token outright.)
+      // Explicit hard-expiry check every time the token is decoded.
       const issuedAt = (token.iat as number) ?? 0;
       const now = Math.floor(Date.now() / 1000);
       if (now - issuedAt > timeoutSeconds) {
@@ -62,7 +58,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // If jwt() returned an empty/expired token, don't populate session.user.
       if (!token || !token.email) {
         return { ...session, user: undefined, expires: session.expires };
       }
