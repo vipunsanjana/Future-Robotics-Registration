@@ -38,15 +38,15 @@ Create a `.env.local` file in the root directory and add your secret keys. **Nev
 
 ```env
 # Google OAuth Credentials
-GOOGLE_CLIENT_ID="your_google_client_id"
-GOOGLE_CLIENT_SECRET="your_google_client_secret"
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 
 # NextAuth Configuration
-NEXTAUTH_URL="http://localhost:5173" 
-NEXTAUTH_URL=<your-nextauth-url>
+NEXTAUTH_URL=
+NEXTAUTH_URL=
 
-# MongoDB Database (if applicable)
-MONGODB_URI="your_mongodb_connection_string"
+# MongoDB Database
+MONGODB_URI=
 
 ```
 
