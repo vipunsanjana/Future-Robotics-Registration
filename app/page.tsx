@@ -67,8 +67,8 @@ const features = [
   },
   {
     icon: Bot,
-    title: "Real Robotics",
-    desc: "Build real robots. From sensors and motors to programming and automation systems.",
+    title: "Build Real Systems",
+    desc: "From sensors and motors to programming and automation — build projects that actually work.",
   },
   {
     icon: ShieldCheck,
@@ -140,7 +140,7 @@ export default function Home() {
               <AuthCta
                 size="lg"
                 className="glow"
-                loggedOutLabel="Register for a Course"
+                loggedOutLabel="Registration for a Course"
                 loggedInLabel="Go to Dashboard"
               />
               <Link href="/#courses">

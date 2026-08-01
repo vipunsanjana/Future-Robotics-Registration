@@ -1,24 +1,32 @@
-// app/login/page.tsx
 "use client";
 
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import { Mail, ArrowLeft, ShieldAlert } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ArrowLeft, ShieldAlert, Loader2 } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 function LoginContent() {
   const router = useRouter();
   const params = useSearchParams();
+
   const callbackUrl = params.get("callbackUrl") || "/dashboard";
   const error = params.get("error");
+
   const [loading, setLoading] = useState(false);
 
   const { status } = useSession();
 
-  // If a valid (non-expired) session already exists, skip straight past login.
   useEffect(() => {
     if (status === "authenticated") {
       router.replace(callbackUrl);
@@ -27,62 +35,120 @@ function LoginContent() {
 
   const handleGoogle = async () => {
     setLoading(true);
-    await signIn("google", { callbackUrl });
+
+    await signIn("google", {
+      callbackUrl,
+    });
   };
 
-  // Avoid flashing the login form while session status is being resolved,
-  // and avoid rendering it at all once we know we're authenticated
-  // (the effect above will redirect).
   if (status === "loading" || status === "authenticated") {
     return null;
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/30 px-4">
-      <div className="absolute left-1/2 top-1/4 h-[300px] w-[500px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
-      <Card className="relative w-full max-w-md border-border/60 shadow-xl">
-        <CardHeader className="space-y-3 text-center">
-          <div className="flex h-12 w-12 mx-auto items-center justify-center rounded-lg overflow-hidden bg-primary text-primary-foreground">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 dark:from-zinc-950 dark:via-zinc-900 dark:to-black">
+
+      {/* Background Glow */}
+      <div className="absolute left-1/2 top-1/4 h-[320px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/10 blur-[140px]" />
+
+      <Card className="relative w-full max-w-md border border-border/60 bg-background/90 backdrop-blur-xl shadow-2xl">
+
+        <CardHeader className="space-y-5 text-center">
+
+          <div className="mx-auto h-16 w-16 overflow-hidden rounded-2xl border bg-white shadow-lg">
             <img
               src="/Logo.jpeg"
-              alt="Future Robotics Academy Logo"
+              alt="Future Robotics Academy"
               className="h-full w-full object-cover"
             />
           </div>
-          <CardTitle className="text-2xl">Welcome to Future Robotics</CardTitle>
-          <CardDescription>
-            Sign in with your Google account to access the dashboard.
-          </CardDescription>
+
+          <div>
+            <CardTitle className="text-3xl font-bold">
+              Welcome Back
+            </CardTitle>
+
+            <CardDescription className="mt-2 text-base">
+              Sign in with your Google account to continue.
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+
+        <CardContent className="space-y-5">
+
           {error && (
-            <div className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-left animate-in fade-in slide-in-from-top-1 duration-300">
-              <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-900 dark:bg-red-950/30">
+              <ShieldAlert className="mt-0.5 h-5 w-5 text-red-500" />
+
               <div>
-                <p className="text-sm font-semibold text-destructive">Access denied</p>
-                <p className="mt-0.5 text-xs text-destructive/80">
-                  This Google account isn&apos;t registered. Please contact your administrator to get access.
+                <p className="font-semibold text-red-600">
+                  Access denied
+                </p>
+
+                <p className="text-sm text-red-500">
+                  This Google account isn't authorized. Please contact the administrator.
                 </p>
               </div>
             </div>
           )}
 
           <Button
-            className="w-full"
-            size="lg"
-            variant="outline"
             onClick={handleGoogle}
             disabled={loading}
+            size="lg"
+            className="
+              group
+              relative
+              h-14
+              w-full
+              overflow-hidden
+              rounded-xl
+              border
+              border-gray-200
+              bg-white
+              text-gray-900
+              shadow-md
+              transition-all
+              duration-300
+              hover:-translate-y-1
+              hover:border-blue-300
+              hover:bg-white
+              hover:shadow-xl
+              active:scale-[0.98]
+              dark:border-zinc-700
+              dark:bg-zinc-900
+              dark:text-white
+            "
           >
-            <Mail className="mr-2 h-5 w-5" />
-            {loading ? "Signing in..." : "Continue with Google"}
+            {/* Hover Shine */}
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+
+            {loading ? (
+              <>
+                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <FcGoogle className="mr-3 text-2xl transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+                <span className="font-semibold tracking-wide">
+                  Continue with Google
+                </span>
+              </>
+            )}
           </Button>
 
           <Link href="/" className="block">
-            <Button variant="ghost" className="w-full" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back to home
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full transition-all hover:bg-muted"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Home
             </Button>
           </Link>
+
         </CardContent>
       </Card>
     </div>
@@ -91,7 +157,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <LoginContent />
     </Suspense>
   );
