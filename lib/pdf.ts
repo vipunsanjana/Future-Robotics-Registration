@@ -30,8 +30,6 @@ export async function generateRegistrationPdf(reg: Registration): Promise<jsPDF>
   const stamp = now.toLocaleString();
 
   try {
-    // Fetch the logo from the public folder
-    // Ensure the image exists at public/Logo.jpeg
     const logoBase64 = await getBase64ImageFromUrl("/Logo.jpeg");
     // Parameters: image, format, x, y, width, height
     doc.addImage(logoBase64, "JPEG", 60, 64, 60, 60); 
@@ -127,7 +125,7 @@ export async function generateRegistrationPdf(reg: Registration): Promise<jsPDF>
     "",
   ];
 
-  if (reg.mode === "Normal") {
+  if (reg.mode === "Online") {
     lines.push("You will be added to the WhatsApp Group 3 days before the start of the course.");
     lines.push("Zoom links and other details will be shared through the WhatsApp Group.");
   }
@@ -147,8 +145,8 @@ export async function generateRegistrationPdf(reg: Registration): Promise<jsPDF>
     if (line.includes("CEO")) doc.setFont("helvetica", "normal");
   }
 
-  // Second page: course requirements (Normal mode only)
-  if (reg.mode === "Normal") {
+  // Second page: course requirements (Online mode only)
+  if (reg.mode === "Online") {
     doc.addPage();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
