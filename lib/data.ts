@@ -1,18 +1,21 @@
 import { getDb } from "./mongodb";
-import type { Registration, RegistrationInput, User, Role } from "./types";
+import type { Registration, RegistrationInput, User, Role, Course } from "./types";
 
 // Prevent Next.js hot-reloads from wiping out memory data in dev mode
 const globalStore = global as unknown as {
   memUsers: User[];
   memRegs: Registration[];
+  memCourses: Course[];
 };
 
 const memUsers: User[] = globalStore.memUsers || [];
 const memRegs: Registration[] = globalStore.memRegs || [];
+const memCourses: Course[] = globalStore.memCourses || [];
 
 if (process.env.NODE_ENV !== "production") {
   globalStore.memUsers = memUsers;
   globalStore.memRegs = memRegs;
+  globalStore.memCourses = memCourses;
 }
 
 // Helper to check if an ID is a valid MongoDB ObjectId
@@ -146,4 +149,73 @@ export async function getStats() {
   const byCourse: Record<string, number> = {};
   for (const r of regs) byCourse[r.course] = (byCourse[r.course] ?? 0) + 1;
   return { total, normal, recording, revenue, byCourse };
+}
+
+// --- Courses Data Functions ---
+
+export async function createCourse(input: Omit<Course, "_id">): Promise<Course> {
+  const db = await getDb();
+  const course: Course = {
+    ...input,
+    _id: oid(),
+  };
+  
+  if (db) {
+    const { _id, ...courseWithoutId } = course;
+    const res = await db.collection("courses").insertOne(courseWithoutId);
+    return { ...course, _id: String(res.insertedId) };
+  }
+  
+  memCourses.push(course);
+  return course;
+}
+
+export async function getCourses(): Promise<Course[]> {
+  const db = await getDb();
+  if (db) {
+    const courses = await db.collection<Course>("courses").find({}).toArray();
+    return courses.map((c) => ({ ...c, _id: String(c._id) }));
+  }
+  return [...memCourses];
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  const db = await getDb();
+  if (db && isValidMongoId(id)) {
+    const { ObjectId } = require("mongodb");
+    await db.collection("courses").deleteOne({ _id: new ObjectId(id) });
+    return;
+  }
+  const i = memCourses.findIndex((x) => x._id === id);
+  if (i >= 0) memCourses.splice(i, 1);
+}
+
+export async function updateCourse(id: string, updates: Partial<Course>): Promise<Course | null> {
+  const db = await getDb();
+  if (db && isValidMongoId(id)) {
+    const { ObjectId } = require("mongodb");
+    const { _id, ...safeUpdates } = updates as any;
+    
+    await db.collection("courses").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: safeUpdates }
+    );
+    
+    // Fetch and return the updated document
+    const updated = await db.collection<Course>("courses").findOne({ _id: new ObjectId(id) });
+    return updated ? { ...updated, _id: String(updated._id) } : null;
+  }
+  
+  // Fallback for memory store (Dev Mode)
+  const c = memCourses.find((x) => x._id === id);
+  if (c) {
+    if (updates.courseCode !== undefined) c.courseCode = updates.courseCode;
+    if (updates.title !== undefined) c.title = updates.title;
+    if (updates.lecturer !== undefined) c.lecturer = updates.lecturer;
+    if (updates.duration !== undefined) c.duration = updates.duration;
+    if (updates.fee !== undefined) c.fee = updates.fee;
+    if (updates.status !== undefined) c.status = updates.status;
+    return c;
+  }
+  return null;
 }

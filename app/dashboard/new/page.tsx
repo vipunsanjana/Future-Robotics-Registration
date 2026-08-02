@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Bot, PlayCircle, Download, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,33 +10,61 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { downloadRegistrationPdf } from "@/lib/pdf";
-import type { Registration, CourseMode } from "@/lib/types";
-
-const COURSES = [
-  "Robotics Fundamentals",
-  "Arduino & Sensors",
-  "Industrial Automation",
-  "Python for Robotics",
-  "IoT & Embedded Systems",
-  "Advanced Robotics",
-];
+import type { Registration, CourseMode, Course } from "@/lib/types";
 
 export default function NewRegistrationPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<CourseMode>("Normal");
+  const [mode, setMode] = useState<CourseMode>("Online");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<Registration | null>(null);
   const [error, setError] = useState("");
+
+  // Store ALL fetched courses
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
 
   const [form, setForm] = useState({
     name: "",
     phone: "",
     regNo: "",
-    course: COURSES[0],
+    course: "", 
     amount: "",
     date: new Date().toISOString().slice(0, 10),
     description: "",
   });
+
+  // Fetch courses on component mount
+  useEffect(() => {
+    fetch("/api/courses")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: Course[]) => {
+        setAllCourses(data);
+        
+        // Filter by the default mode ("Online") and set the first course
+        const initialFiltered = data.filter((c) => c.status === "Online");
+        if (initialFiltered.length > 0) {
+          setForm((prev) => ({ ...prev, course: initialFiltered[0].title }));
+        }
+      })
+      .catch(() => setAllCourses([]))
+      .finally(() => setLoadingCourses(false));
+  }, []);
+
+  // Filter courses dynamically based on the current mode
+  const filteredCourses = useMemo(() => {
+    return allCourses.filter((c) => c.status === mode);
+  }, [allCourses, mode]);
+
+  // Handle Mode Change (Updates mode AND resets the selected course to match)
+  const handleModeChange = (newMode: CourseMode) => {
+    setMode(newMode);
+    const newFiltered = allCourses.filter((c) => c.status === newMode);
+    
+    setForm((prev) => ({
+      ...prev,
+      course: newFiltered.length > 0 ? newFiltered[0].title : "",
+    }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -96,7 +124,10 @@ export default function NewRegistrationPage() {
               <Download className="mr-2 h-5 w-5" /> Download PDF Receipt
             </Button>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" className="w-full sm:flex-1" onClick={() => { setSuccess(null); setForm({ ...form, name: "", phone: "", regNo: "", description: "" }); }}>
+              <Button variant="outline" className="w-full sm:flex-1" onClick={() => { 
+                setSuccess(null); 
+                setForm({ ...form, name: "", phone: "", regNo: "", description: "" }); 
+              }}>
                 New Registration
               </Button>
               <Button variant="outline" className="w-full sm:flex-1" onClick={() => router.push("/dashboard/registrations")}>
@@ -120,19 +151,19 @@ export default function NewRegistrationPage() {
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => setMode("Normal")}
-          className={`rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all ${mode === "Normal" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+          onClick={() => handleModeChange("Online")}
+          className={`rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all ${mode === "Online" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
         >
           <div className="mb-1.5 flex items-center gap-2">
             <Bot className="h-5 w-5 text-primary shrink-0" />
-            <span className="font-semibold text-sm sm:text-base">Normal Course</span>
-            {mode === "Normal" && <Badge className="ml-auto text-[10px]">Selected</Badge>}
+            <span className="font-semibold text-sm sm:text-base">Online Course</span>
+            {mode === "Online" && <Badge className="ml-auto text-[10px]">Selected</Badge>}
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground">Live sessions with attendance, assignments, and a final project.</p>
         </button>
         <button
           type="button"
-          onClick={() => setMode("Recording")}
+          onClick={() => handleModeChange("Recording")}
           className={`rounded-xl border-2 p-3.5 sm:p-4 text-left transition-all ${mode === "Recording" ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
         >
           <div className="mb-1.5 flex items-center gap-2">
@@ -173,11 +204,20 @@ export default function NewRegistrationPage() {
                   value={form.course}
                   onChange={handleChange}
                   required
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  disabled={loadingCourses || filteredCourses.length === 0}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
                 >
-                  {COURSES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
+                  {loadingCourses ? (
+                    <option value="">Loading courses...</option>
+                  ) : filteredCourses.length === 0 ? (
+                    <option value="">No {mode} courses available</option>
+                  ) : (
+                    filteredCourses.map((c) => (
+                      <option key={c._id} value={c.title}>
+                        {c.title}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
             </div>
@@ -193,7 +233,7 @@ export default function NewRegistrationPage() {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" value={form.description} onChange={handleChange} required placeholder="Course fee for Robotics Fundamentals - Month 1" rows={3} />
+              <Textarea id="description" name="description" value={form.description} onChange={handleChange} required placeholder="Course fee for selected course - Month 1" rows={3} />
             </div>
 
             {error && (
@@ -202,7 +242,7 @@ export default function NewRegistrationPage() {
               </div>
             )}
 
-            <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+            <Button type="submit" className="w-full" size="lg" disabled={submitting || loadingCourses || filteredCourses.length === 0}>
               {submitting ? (
                 <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Saving...</>
               ) : (

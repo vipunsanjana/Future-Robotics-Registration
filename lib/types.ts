@@ -9,7 +9,7 @@ export interface User {
   createdAt: string;
 }
 
-export type CourseMode = "Normal" | "Recording";
+export type CourseMode = "Online" | "Recording";
 
 export interface Registration {
   _id?: string;
@@ -34,4 +34,16 @@ export interface RegistrationInput {
   date: string;
   description: string;
   mode: CourseMode;
+}
+
+export type CourseStatus = "Online" | "Recording";
+
+export interface Course {
+  _id?: string;
+  courseCode: string;
+  title: string;
+  lecturer: string;
+  duration: string;
+  fee: number;
+  status: CourseStatus;
 }

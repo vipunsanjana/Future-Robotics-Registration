@@ -11,7 +11,8 @@ import {
   ClipboardList, 
   LogOut, 
   Menu, 
-  ShieldCheck 
+  ShieldCheck,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,6 +34,7 @@ export function DashboardShell({ children, name, image, role }: DashboardShellPr
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "New Registration", href: "/dashboard/new", icon: UserPlus },
     { name: "Registrations", href: "/dashboard/registrations", icon: ClipboardList },
+    { name: "Courses", href: "/dashboard/courses", icon: BookOpen },
     ...(role === "admin" ? [{ name: "User Management", href: "/dashboard/users", icon: Users }] : []),
   ];
 
