@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   if (!name || !phone || !regNo || !course || !amount || !date || !description || !mode) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-  if (mode !== "Normal" && mode !== "Recording") {
+  if (mode !== "Online" && mode !== "Recording") {
     return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
   }
 
