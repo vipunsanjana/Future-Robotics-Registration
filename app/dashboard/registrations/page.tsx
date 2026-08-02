@@ -28,7 +28,7 @@ export default function RegistrationsPage() {
   const [regs, setRegs] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [modeFilter, setModeFilter] = useState<"all" | "Normal" | "Recording">("all");
+  const [modeFilter, setModeFilter] = useState<"all" | "Online" | "Recording">("all");
   
   // States for deleting
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -160,7 +160,7 @@ export default function RegistrationsPage() {
                 />
               </div>
               <div className="flex gap-1">
-                {(["all", "Normal", "Recording"] as const).map((m) => (
+                {(["all", "Online", "Recording"] as const).map((m) => (
                   <Button
                     key={m}
                     size="sm"
@@ -209,8 +209,8 @@ export default function RegistrationsPage() {
                       <TableCell>{r.course}</TableCell>
                       <TableCell className="font-medium">{r.regNo}</TableCell>
                       <TableCell>
-                        <Badge variant={r.mode === "Normal" ? "default" : "secondary"}>
-                          {r.mode === "Normal" ? <Bot className="mr-1 h-3 w-3" /> : <PlayCircle className="mr-1 h-3 w-3" />}
+                        <Badge variant={r.mode === "Online" ? "default" : "secondary"}>
+                          {r.mode === "Online" ? <Bot className="mr-1 h-3 w-3" /> : <PlayCircle className="mr-1 h-3 w-3" />}
                           {r.mode}
                         </Badge>
                       </TableCell>
