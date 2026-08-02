@@ -142,13 +142,14 @@ export async function deleteRegistration(id: string): Promise<void> {
 
 export async function getStats() {
   const regs = await listRegistrations();
+  const regsCourse = await getCourses();
   const total = regs.length;
   const normal = regs.filter((r) => r.mode === "Online").length;
   const recording = regs.filter((r) => r.mode === "Recording").length;
-  const revenue = regs.reduce((sum, r) => sum + r.amount, 0);
+  const totalCourse = regsCourse.length;
   const byCourse: Record<string, number> = {};
   for (const r of regs) byCourse[r.course] = (byCourse[r.course] ?? 0) + 1;
-  return { total, normal, recording, revenue, byCourse };
+  return { total, normal, recording,totalCourse, byCourse };
 }
 
 // --- Courses Data Functions ---

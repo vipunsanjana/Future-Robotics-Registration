@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ClipboardList, TrendingUp, Bot } from "lucide-react";
+import { ClipboardList, TrendingUp, Bot, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
@@ -21,6 +21,7 @@ interface Stats {
   normal: number;
   recording: number;
   revenue: number;
+  totalCourse: number;
   byCourse: Record<string, number>;
 }
 
@@ -47,14 +48,15 @@ export default function DashboardPage() {
 
   const courseData = Object.entries(stats.byCourse).map(([name, value]) => ({ name, value }));
   const modeData = [
-    { name: "Normal", value: stats.normal },
-    { name: "Recording", value: stats.recording },
+    { name: "Online Registraion", value: stats.normal },
+    { name: "Recording Registraion", value: stats.recording },
   ];
 
   const cards = [
     { label: "Total Registrations", value: stats.total, icon: ClipboardList, color: "text-primary" },
-    { label: "Normal Mode", value: stats.normal, icon: Bot, color: "text-accent" },
-    { label: "Recording Mode", value: stats.recording, icon: TrendingUp, color: "text-chart-3" },
+    { label: "Online Mode Registraion", value: stats.normal, icon: Bot, color: "text-accent" },
+    { label: "Recording Mode Registraion", value: stats.recording, icon: TrendingUp, color: "text-chart-3" },
+    { label: "Total Courses", value: stats.totalCourse, icon: BookOpen, color: "text-green-600" },
   ];
 
   return (
@@ -64,7 +66,7 @@ export default function DashboardPage() {
         <p className="text-xs sm:text-sm text-muted-foreground">Overview of registrations.</p>
       </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <Card key={c.label} className="transition-all hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
