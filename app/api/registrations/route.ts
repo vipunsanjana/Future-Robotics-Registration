@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     await getDb();
     
+    
     const body = await req.json();
     const { name, phone, regNo, course, amount, date, description, mode, email, address } = body;
 
