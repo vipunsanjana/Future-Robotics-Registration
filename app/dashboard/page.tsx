@@ -35,6 +35,7 @@ export default function DashboardPage() {
     fetch("/api/stats")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setStats(d))
+      .catch((err) => console.error("Failed to fetch stats:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -46,17 +47,20 @@ export default function DashboardPage() {
     return <div className="flex h-64 items-center justify-center text-muted-foreground">No data available.</div>;
   }
 
-  const courseData = Object.entries(stats.byCourse).map(([name, value]) => ({ name, value }));
+  // 1. Added safety fallback `|| {}` to prevent crashes if the API omits `byCourse`
+  const courseData = Object.entries(stats.byCourse || {}).map(([name, value]) => ({ name, value }));
+  
+  // 2. Filter out data with 0 values to prevent Recharts PieChart math/rendering errors
   const modeData = [
-    { name: "Online Registraion", value: stats.normal },
-    { name: "Recording Registraion", value: stats.recording },
-  ];
+    { name: "Online Registration", value: stats.normal || 0 },
+    { name: "Recording Registration", value: stats.recording || 0 },
+  ].filter((data) => data.value > 0);
 
   const cards = [
-    { label: "Total Registrations", value: stats.total, icon: ClipboardList, color: "text-primary" },
-    { label: "Online Mode Registraion", value: stats.normal, icon: Bot, color: "text-accent" },
-    { label: "Recording Mode Registraion", value: stats.recording, icon: TrendingUp, color: "text-chart-3" },
-    { label: "Total Courses", value: stats.totalCourse, icon: BookOpen, color: "text-green-600" },
+    { label: "Total Registrations", value: stats.total || 0, icon: ClipboardList, color: "text-primary" },
+    { label: "Online Mode Registration", value: stats.normal || 0, icon: Bot, color: "text-accent" },
+    { label: "Recording Mode Registration", value: stats.recording || 0, icon: TrendingUp, color: "text-chart-3" },
+    { label: "Total Courses", value: stats.totalCourse || 0, icon: BookOpen, color: "text-green-600" },
   ];
 
   return (
@@ -89,7 +93,7 @@ export default function DashboardPage() {
             {courseData.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">No registrations yet.</p>
             ) : (
-              <div className="h-64 sm:h-80 w-full">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={courseData} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
                     <XAxis 
@@ -101,7 +105,7 @@ export default function DashboardPage() {
                       height={55} 
                     />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                    <Tooltip />
+                    <Tooltip cursor={{ fill: "transparent" }} />
                     <Bar dataKey="value" fill="hsl(221 83% 53%)" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -115,10 +119,10 @@ export default function DashboardPage() {
             <CardTitle className="text-base sm:text-lg">Mode Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            {stats.total === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">No registrations yet.</p>
+            {modeData.length === 0 ? (
+              <p className="py-12 text-center text-sm text-muted-foreground">No mode data available.</p>
             ) : (
-              <div className="h-64 sm:h-80 w-full">
+              <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie 
