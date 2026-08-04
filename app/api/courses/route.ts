@@ -105,7 +105,8 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const updatedCourse = await updateCourse(_id, {
+    // FIX: Assert _id as a string here to resolve the TS error
+    const updatedCourse = await updateCourse(_id as string, {
       courseCode,
       title,
       lecturer,
