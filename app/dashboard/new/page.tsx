@@ -220,9 +220,11 @@ export default function NewRegistrationPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="regNo" className="flex items-center gap-2">
+                <Label htmlFor="regNo">
                   Registration Number
-                  {isSearchingStudent && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                  {isSearchingStudent && (
+                    <Loader2 className="inline-block ml-2 h-3 w-3 animate-spin text-muted-foreground" />
+                  )}
                 </Label>
                 <Input 
                   id="regNo" 
