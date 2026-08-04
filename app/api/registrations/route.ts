@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
 
     const uppercaseRegNo = regNo.trim().toUpperCase();
 
-    // 1. Find if the user is already registered for this course
     const existingRegistration = await Registration.findOne({
       regNo: uppercaseRegNo,
       course: course.trim(),
@@ -34,7 +33,6 @@ export async function POST(req: NextRequest) {
     const courseDoc = await Course.findOne({ title: course.trim() });
     const courseCode = courseDoc ? courseDoc.courseCode : "UNKNOWN";
 
-    // 2. Handle Student Record (Create or Update)
     let studentRecord = await Student.findOne({ regNo: uppercaseRegNo });
 
     if (!studentRecord) {
@@ -59,7 +57,6 @@ export async function POST(req: NextRequest) {
       await studentRecord.save();
     }
 
-    // 3. ALWAYS create the Payment record
     const documentNo = `DOC-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const isCompleted = /Full course payment done/i.test(description);
 
@@ -75,7 +72,6 @@ export async function POST(req: NextRequest) {
       isCompleted,
     });
 
-    // 4. Create Registration ONLY if it doesn't already exist
     let reg = existingRegistration;
     if (!existingRegistration) {
       reg = await Registration.create({
