@@ -19,7 +19,6 @@ export default function NewRegistrationPage() {
   const [success, setSuccess] = useState<Registration | null>(null);
   const [error, setError] = useState("");
 
-  // Store ALL fetched courses
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
 
@@ -33,14 +32,11 @@ export default function NewRegistrationPage() {
     description: "",
   });
 
-  // Fetch courses on component mount
   useEffect(() => {
     fetch("/api/courses")
       .then((r) => (r.ok ? r.json() : []))
       .then((data: Course[]) => {
         setAllCourses(data);
-        
-        // Filter by the default mode ("Online") and set the first course
         const initialFiltered = data.filter((c) => c.status === "Online");
         if (initialFiltered.length > 0) {
           setForm((prev) => ({ ...prev, course: initialFiltered[0].title }));
@@ -50,12 +46,10 @@ export default function NewRegistrationPage() {
       .finally(() => setLoadingCourses(false));
   }, []);
 
-  // Filter courses dynamically based on the current mode
   const filteredCourses = useMemo(() => {
     return allCourses.filter((c) => c.status === mode);
   }, [allCourses, mode]);
 
-  // Handle Mode Change (Updates mode AND resets the selected course to match)
   const handleModeChange = (newMode: CourseMode) => {
     setMode(newMode);
     const newFiltered = allCourses.filter((c) => c.status === newMode);
@@ -68,6 +62,26 @@ export default function NewRegistrationPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // Auto-fill student data if regNo exists
+  const handleRegNoBlur = async () => {
+    if (!form.regNo.trim()) return;
+    try {
+      const res = await fetch(`/api/students/by-reg?regNo=${encodeURIComponent(form.regNo.trim())}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.found && data.student) {
+          setForm((prev) => ({
+            ...prev,
+            name: data.student.name || prev.name,
+            phone: data.student.phone || prev.phone,
+          }));
+        }
+      }
+    } catch {
+      // Quiet fail if student not found
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,7 +161,6 @@ export default function NewRegistrationPage() {
         <p className="text-xs sm:text-sm text-muted-foreground">Fill in the student details and generate a PDF receipt.</p>
       </div>
 
-      {/* Mode selector */}
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
@@ -183,18 +196,27 @@ export default function NewRegistrationPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1.5">
+                <Label htmlFor="regNo">Registration Number</Label>
+                <Input 
+                  id="regNo" 
+                  name="regNo" 
+                  value={form.regNo} 
+                  onChange={handleChange} 
+                  onBlur={handleRegNoBlur}
+                  required 
+                  placeholder="FR-2025-001" 
+                />
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="name">Student Name</Label>
                 <Input id="name" name="name" value={form.name} onChange={handleChange} required placeholder="John Doe" />
               </div>
+            </div>
+
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" name="phone" value={form.phone} onChange={handleChange} required placeholder="+94 77 123 4567" />
-              </div>
-            </div>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="regNo">Registration Number</Label>
-                <Input id="regNo" name="regNo" value={form.regNo} onChange={handleChange} required placeholder="FR-2025-001" />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="course">Course</Label>
@@ -213,7 +235,7 @@ export default function NewRegistrationPage() {
                     <option value="">No {mode} courses available</option>
                   ) : (
                     filteredCourses.map((c) => (
-                      <option key={c._id} value={c.title}>
+                      <option key={String(c._id ?? c.title)} value={c.title}>
                         {c.title}
                       </option>
                     ))
@@ -221,6 +243,7 @@ export default function NewRegistrationPage() {
                 </select>
               </div>
             </div>
+
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="amount">Amount (LKR)</Label>
@@ -231,9 +254,10 @@ export default function NewRegistrationPage() {
                 <Input id="date" name="date" type="date" value={form.date} onChange={handleChange} required />
               </div>
             </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="description">Description</Label>
-              <Textarea id="description" name="description" value={form.description} onChange={handleChange} required placeholder="Course fee for selected course - Month 1" rows={3} />
+              <Textarea id="description" name="description" value={form.description} onChange={handleChange} required placeholder="Course fee for selected course - Full course payment done" rows={3} />
             </div>
 
             {error && (

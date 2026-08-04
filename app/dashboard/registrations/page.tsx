@@ -76,7 +76,7 @@ export default function RegistrationsPage() {
     setDeleting(registrationToDelete);
     try {
       await fetch(`/api/registrations/list?id=${registrationToDelete}`, { method: "DELETE" });
-      setRegs(regs.filter((r) => r._id !== registrationToDelete));
+      setRegs(regs.filter((r) => r._id?.toString() !== registrationToDelete));
       setDeleteDialogOpen(false);
       showAwesomeMessage("Awesome! Registration deleted successfully! 🎉");
     } finally {
@@ -199,47 +199,51 @@ export default function RegistrationsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((r) => (
-                    <TableRow key={r._id}>
-                      <TableCell className="font-mono text-xs">{r.documentNo}</TableCell>
-                      <TableCell>
-                        <div className="font-medium">{r.name}</div>
-                        <div className="text-xs text-muted-foreground">{r.phone}</div>
-                      </TableCell>
-                      <TableCell>{r.course}</TableCell>
-                      <TableCell className="font-medium">{r.regNo}</TableCell>
-                      <TableCell>
-                        <Badge variant={r.mode === "Online" ? "default" : "secondary"}>
-                          {r.mode === "Online" ? <Bot className="mr-1 h-3 w-3" /> : <PlayCircle className="mr-1 h-3 w-3" />}
-                          {r.mode}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-medium">LKR {r.amount.toLocaleString()}</TableCell>
-                      <TableCell className="text-sm">{r.date}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            onClick={() => handleDownload(r)} 
-                            title="Download PDF"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => confirmDelete(r._id!)}
-                            disabled={deleting === r._id}
-                            title="Delete"
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            {deleting === r._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filtered.map((r) => {
+                    const registrationId = r._id?.toString() ?? r.documentNo;
+
+                    return (
+                      <TableRow key={registrationId}>
+                        <TableCell className="font-mono text-xs">{r.documentNo}</TableCell>
+                        <TableCell>
+                          <div className="font-medium">{r.name}</div>
+                          <div className="text-xs text-muted-foreground">{r.phone}</div>
+                        </TableCell>
+                        <TableCell>{r.course}</TableCell>
+                        <TableCell className="font-medium">{r.regNo}</TableCell>
+                        <TableCell>
+                          <Badge variant={r.mode === "Online" ? "default" : "secondary"}>
+                            {r.mode === "Online" ? <Bot className="mr-1 h-3 w-3" /> : <PlayCircle className="mr-1 h-3 w-3" />}
+                            {r.mode}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-medium">LKR {r.amount.toLocaleString()}</TableCell>
+                        <TableCell className="text-sm">{r.date}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              onClick={() => handleDownload(r)} 
+                              title="Download PDF"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => confirmDelete(registrationId)}
+                              disabled={deleting === registrationId}
+                              title="Delete"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              {deleting === registrationId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>

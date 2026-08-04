@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionRole } from "@/lib/session";
-import { createRegistration } from "@/lib/data";
-import type { RegistrationInput, CourseMode } from "@/lib/types";
+import { getDb } from "@/lib/mongodb";
+import { Registration, Student, Payment, Course } from "@/lib/models";
+import type { CourseMode } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   const session = await getSessionRole();
@@ -9,31 +10,93 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: RegistrationInput;
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+    await getDb();
+    
+    const body = await req.json();
+    const { name, phone, regNo, course, amount, date, description, mode, email, address } = body;
 
-  const { name, phone, regNo, course, amount, date, description, mode } = body;
-  if (!name || !phone || !regNo || !course || !amount || !date || !description || !mode) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-  if (mode !== "Online" && mode !== "Recording") {
-    return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
-  }
+    if (!name || !phone || !regNo || !course || !amount || !date || !description || !mode) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+    if (mode !== "Online" && mode !== "Recording") {
+      return NextResponse.json({ error: "Invalid mode" }, { status: 400 });
+    }
 
-  const reg = await createRegistration({
-    name,
-    phone,
-    regNo,
-    course,
-    amount: Number(amount),
-    date,
-    description,
-    mode: mode as CourseMode,
-  });
+    const uppercaseRegNo = regNo.trim().toUpperCase();
 
-  return NextResponse.json(reg, { status: 201 });
+    const existingRegistration = await Registration.findOne({
+      regNo: uppercaseRegNo,
+      course: course.trim(),
+    });
+
+    if (existingRegistration) {
+      return NextResponse.json(
+        { error: "Student with this Registration No. is already registered for this course." },
+        { status: 400 }
+      );
+    }
+
+    const courseDoc = await Course.findOne({ title: course.trim() });
+    const courseCode = courseDoc ? courseDoc.courseCode : "UNKNOWN";
+
+    let studentRecord = await Student.findOne({ regNo: uppercaseRegNo });
+
+    if (!studentRecord) {
+      studentRecord = await Student.create({
+        name: name.trim(),
+        phone: phone.trim(),
+        regNo: uppercaseRegNo,
+        course: course.trim(),
+        courseCode: courseCode,
+        email: email ? email.trim() : undefined,
+        address: address ? address.trim() : undefined,
+      });
+    } else {
+
+      if (!studentRecord.course.includes(course.trim())) {
+          studentRecord.course = studentRecord.course ? `${studentRecord.course}, ${course.trim()}` : course.trim();
+      }
+      if (!studentRecord.courseCode.includes(courseCode)) {
+          studentRecord.courseCode = studentRecord.courseCode ? `${studentRecord.courseCode}, ${courseCode}` : courseCode;
+      }
+      if (email) studentRecord.email = email.trim();
+      if (address) studentRecord.address = address.trim();
+      await studentRecord.save();
+    }
+
+    const documentNo = `DOC-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const isCompleted = /Full course payment done/i.test(description);
+
+    await Payment.create({
+      studentId: studentRecord._id,
+      studentName: name.trim(),
+      studentRegNo: uppercaseRegNo,
+      amount: Number(amount),
+      date,
+      description: description.trim(),
+      documentNo,
+      isCompleted,
+    });
+
+    const reg = await Registration.create({
+      name: name.trim(),
+      phone: phone.trim(),
+      regNo: uppercaseRegNo,
+      course: course.trim(),
+      amount: Number(amount),
+      date,
+      description: description.trim(),
+      mode: mode as CourseMode,
+      documentNo,
+    });
+
+    return NextResponse.json(reg, { status: 201 });
+  } catch (error: any) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to complete registration" },
+      { status: 500 }
+    );
+  }
 }
