@@ -185,7 +185,7 @@ export default function UsersPage() {
   };
 
   const openEditDialog = (user: User) => {
-    setEditingId(user._id || null);
+    setEditingId(typeof user._id === "string" ? user._id : user._id?.toString() ?? null);
     setEditName(user.name);
     setEditEmail(user.email);
     setEditRole(user.role as "admin" | "manager");
@@ -404,62 +404,66 @@ export default function UsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users?.map((u) => (
-                    <TableRow key={u._id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src={u.image} alt={u.name} />
-                            <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{u.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                          {u.role === "admin" ? <Crown className="mr-1 h-3 w-3" /> : <Shield className="mr-1 h-3 w-3" />}
-                          {u.role === "admin" ? "Admin" : "Manager"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">{new Date(u.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={updating === u._id}
-                            onClick={() => handleRoleChange(u._id!, u.role === "admin" ? "manager" : "admin")}
-                          >
-                            {updating === u._id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : u.role === "admin" ? (
-                              "Demote to Manager"
-                            ) : (
-                              "Promote to Admin"
-                            )}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => openEditDialog(u)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            disabled={deleting === u._id}
-                            onClick={() => confirmDelete(u._id!)}
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                          >
-                            {deleting === u._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {users?.map((u) => {
+                    const userId = typeof u._id === "string" ? u._id : u._id?.toString() ?? "";
+
+                    return (
+                      <TableRow key={userId || u.email}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarImage src={u.image} alt={u.name} />
+                              <AvatarFallback>{u.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{u.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={u.role === "admin" ? "default" : "secondary"}>
+                            {u.role === "admin" ? <Crown className="mr-1 h-3 w-3" /> : <Shield className="mr-1 h-3 w-3" />}
+                            {u.role === "admin" ? "Admin" : "Manager"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm">{new Date(u.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={updating === userId}
+                              onClick={() => handleRoleChange(userId, u.role === "admin" ? "manager" : "admin")}
+                            >
+                              {updating === userId ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : u.role === "admin" ? (
+                                "Demote to Manager"
+                              ) : (
+                                "Promote to Admin"
+                              )}
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => openEditDialog(u)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              disabled={deleting === userId}
+                              onClick={() => confirmDelete(userId)}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              {deleting === userId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
