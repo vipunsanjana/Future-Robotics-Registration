@@ -47,10 +47,8 @@ export default function DashboardPage() {
     return <div className="flex h-64 items-center justify-center text-muted-foreground">No data available.</div>;
   }
 
-  // 1. Added safety fallback `|| {}` to prevent crashes if the API omits `byCourse`
   const courseData = Object.entries(stats.byCourse || {}).map(([name, value]) => ({ name, value }));
   
-  // 2. Filter out data with 0 values to prevent Recharts PieChart math/rendering errors
   const modeData = [
     { name: "Online Registration", value: stats.normal || 0 },
     { name: "Recording Registration", value: stats.recording || 0 },
@@ -84,8 +82,8 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 min-w-0">
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle className="text-base sm:text-lg">Registrations by Course</CardTitle>
           </CardHeader>
@@ -93,7 +91,7 @@ export default function DashboardPage() {
             {courseData.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">No registrations yet.</p>
             ) : (
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={courseData} margin={{ top: 10, right: 10, left: -20, bottom: 30 }}>
                     <XAxis 
@@ -114,7 +112,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="min-w-0">
           <CardHeader>
             <CardTitle className="text-base sm:text-lg">Mode Distribution</CardTitle>
           </CardHeader>
@@ -122,7 +120,7 @@ export default function DashboardPage() {
             {modeData.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">No mode data available.</p>
             ) : (
-              <div className="h-[300px] w-full">
+              <div className="h-[300px] w-full min-w-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie 
@@ -131,12 +129,12 @@ export default function DashboardPage() {
                       nameKey="name" 
                       cx="50%" 
                       cy="50%" 
-                      outerRadius={80} 
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={65} // Reduced from 80 to leave room for labels
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`} // Removed the name prefix to prevent horizontal overflow
                       labelLine={false}
                     >
                       {modeData.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                        <Cell key={`cell-${i}`} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
                     <Legend wrapperStyle={{ fontSize: '12px' }} />
