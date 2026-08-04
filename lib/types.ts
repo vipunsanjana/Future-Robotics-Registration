@@ -69,6 +69,7 @@ export interface Payment {
   studentId: string;
   studentName: string;
   studentRegNo: string;
+  courseCode?: string;
   amount: number;
   date: string;
   description: string;

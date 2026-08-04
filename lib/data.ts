@@ -133,7 +133,6 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
   const uppercaseRegNo = input.regNo.trim().toUpperCase();
   const courseTitle = input.course.trim();
 
-  // 1. Check if registration for this course already exists
   if (db) {
     const existingReg = await db.collection("registrations").findOne({
       regNo: uppercaseRegNo,
@@ -151,7 +150,6 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
     }
   }
 
-  // 2. Fetch course code
   let courseCode = "UNKNOWN";
   if (db) {
     const courseDoc = (await db.collection("courses").findOne({ title: courseTitle })) as any;
@@ -163,7 +161,6 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
     if (courseDoc) courseCode = courseDoc.courseCode;
   }
 
-  // 3. Create or update Student
   let studentId = oid();
   let studentRecord = await findStudentByRegNo(uppercaseRegNo);
 
@@ -211,7 +208,6 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
     }
   }
 
-  // 4. Create Payment (Sets isCompleted based on description)
   const documentNumber = docNo();
   const isCompleted = /Full course payment done/i.test(input.description);
 
@@ -220,6 +216,7 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
     studentId: studentId,
     studentName: input.name.trim(),
     studentRegNo: uppercaseRegNo,
+    courseCode: courseCode,
     amount: Number(input.amount),
     date: input.date,
     description: input.description.trim(),

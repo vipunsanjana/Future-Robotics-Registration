@@ -26,6 +26,7 @@ const PaymentSchema = new Schema<PaymentType>(
     studentId: { type: String, required: true },
     studentName: { type: String, required: true },
     studentRegNo: { type: String, required: true },
+    courseCode: { type: String }, // <-- This will now save properly
     amount: { type: Number, required: true, min: 0 },
     date: { type: String, required: true },
     description: { type: String, required: true, trim: true },
@@ -64,6 +65,14 @@ const CourseSchema = new Schema<CourseType>(
   },
   { timestamps: true }
 );
+
+// --- CLEAR CACHE (Fixes Next.js hot-reload bug) ---
+if (process.env.NODE_ENV !== "production") {
+  delete mongoose.models.Student;
+  delete mongoose.models.Payment;
+  delete mongoose.models.Registration;
+  delete mongoose.models.Course;
+}
 
 // Export Models
 export const Student = mongoose.models.Student || mongoose.model<StudentType>("Student", StudentSchema);

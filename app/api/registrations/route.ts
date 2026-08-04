@@ -25,21 +25,16 @@ export async function POST(req: NextRequest) {
 
     const uppercaseRegNo = regNo.trim().toUpperCase();
 
+    // 1. Find if the user is already registered for this course
     const existingRegistration = await Registration.findOne({
       regNo: uppercaseRegNo,
       course: course.trim(),
     });
 
-    if (existingRegistration) {
-      return NextResponse.json(
-        { error: "Student with this Registration No. is already registered for this course." },
-        { status: 400 }
-      );
-    }
-
     const courseDoc = await Course.findOne({ title: course.trim() });
     const courseCode = courseDoc ? courseDoc.courseCode : "UNKNOWN";
 
+    // 2. Handle Student Record (Create or Update)
     let studentRecord = await Student.findOne({ regNo: uppercaseRegNo });
 
     if (!studentRecord) {
@@ -53,7 +48,6 @@ export async function POST(req: NextRequest) {
         address: address ? address.trim() : undefined,
       });
     } else {
-
       if (!studentRecord.course.includes(course.trim())) {
           studentRecord.course = studentRecord.course ? `${studentRecord.course}, ${course.trim()}` : course.trim();
       }
@@ -65,13 +59,15 @@ export async function POST(req: NextRequest) {
       await studentRecord.save();
     }
 
+    // 3. ALWAYS create the Payment record
     const documentNo = `DOC-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const isCompleted = /Full course payment done/i.test(description);
 
-    await Payment.create({
+    const payment = await Payment.create({
       studentId: studentRecord._id,
       studentName: name.trim(),
       studentRegNo: uppercaseRegNo,
+      courseCode: courseCode,
       amount: Number(amount),
       date,
       description: description.trim(),
@@ -79,23 +75,27 @@ export async function POST(req: NextRequest) {
       isCompleted,
     });
 
-    const reg = await Registration.create({
-      name: name.trim(),
-      phone: phone.trim(),
-      regNo: uppercaseRegNo,
-      course: course.trim(),
-      amount: Number(amount),
-      date,
-      description: description.trim(),
-      mode: mode as CourseMode,
-      documentNo,
-    });
+    // 4. Create Registration ONLY if it doesn't already exist
+    let reg = existingRegistration;
+    if (!existingRegistration) {
+      reg = await Registration.create({
+        name: name.trim(),
+        phone: phone.trim(),
+        regNo: uppercaseRegNo,
+        course: course.trim(),
+        amount: Number(amount),
+        date,
+        description: description.trim(),
+        mode: mode as CourseMode,
+        documentNo,
+      });
+    }
 
-    return NextResponse.json(reg, { status: 201 });
+    return NextResponse.json({ registration: reg, payment }, { status: 201 });
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("Registration/Payment error:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to complete registration" },
+      { error: error.message || "Failed to process transaction" },
       { status: 500 }
     );
   }
