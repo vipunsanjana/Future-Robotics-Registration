@@ -81,8 +81,8 @@ export default function CoursesPage() {
   }, [courses, search, statusFilter]);
 
   // Open the delete custom dialog
-  const confirmDelete = (id: string) => {
-    setCourseToDelete(id);
+  const confirmDelete = (id: string | { toString(): string }) => {
+    setCourseToDelete(String(id));
     setDeleteDialogOpen(true);
   };
 
@@ -98,7 +98,7 @@ export default function CoursesPage() {
     setDeleting(courseToDelete);
     try {
       await fetch(`/api/courses?id=${courseToDelete}`, { method: "DELETE" });
-      setCourses(courses.filter((c) => c._id !== courseToDelete));
+      setCourses(courses.filter((c) => String(c._id) !== courseToDelete));
       setDeleteDialogOpen(false);
       showAwesomeMessage("Awesome! Course deleted successfully! 🎉");
     } finally {
@@ -450,7 +450,7 @@ export default function CoursesPage() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((c) => (
-                    <TableRow key={c._id}>
+                    <TableRow key={String(c._id ?? c.courseCode)}>
                       <TableCell className="font-mono text-xs font-medium whitespace-nowrap">
                         {c.courseCode}
                       </TableCell>
