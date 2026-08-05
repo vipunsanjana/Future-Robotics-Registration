@@ -236,6 +236,7 @@ export async function createRegistration(input: RegistrationInput): Promise<Regi
   const reg: Registration = {
     ...input,
     regNo: uppercaseRegNo,
+    courseCode: courseCode,
     amount: Number(input.amount),
     _id: oid(),
     documentNo: documentNumber,

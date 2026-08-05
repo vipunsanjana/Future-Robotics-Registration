@@ -44,6 +44,7 @@ const RegistrationSchema = new Schema<RegistrationType>(
     phone: { type: String, required: true, trim: true },
     regNo: { type: String, required: true, trim: true, uppercase: true },
     course: { type: String, required: true, trim: true },
+    courseCode: { type: String, required: true, trim: true },
     amount: { type: Number, required: true, min: 0 },
     date: { type: String, required: true },
     description: { type: String, required: true, trim: true },

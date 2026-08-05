@@ -44,6 +44,7 @@ export interface Registration {
   regNo: string;
   course: string;
   amount: number;
+  courseCode: string;
   date: string;
   description: string;
   mode: CourseMode;
