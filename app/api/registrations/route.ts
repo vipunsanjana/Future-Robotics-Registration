@@ -25,12 +25,17 @@ export async function POST(req: NextRequest) {
 
     const uppercaseRegNo = regNo.trim().toUpperCase();
 
+    // Escape special characters in course name for RegExp and make it case-insensitive
+    const safeCourseTitle = course.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    const courseRegex = new RegExp(`^${safeCourseTitle}$`, "i");
+
     const existingRegistration = await Registration.findOne({
       regNo: uppercaseRegNo,
-      course: course.trim(),
+      course: { $regex: courseRegex },
     });
 
-    const courseDoc = await Course.findOne({ title: course.trim() });
+    // Match course code case-insensitively
+    const courseDoc = await Course.findOne({ title: { $regex: courseRegex } });
     const courseCode = courseDoc ? courseDoc.courseCode : "UNKNOWN";
 
     let studentRecord = await Student.findOne({ regNo: uppercaseRegNo });
@@ -46,12 +51,23 @@ export async function POST(req: NextRequest) {
         address: address ? address.trim() : undefined,
       });
     } else {
-      if (!studentRecord.course.includes(course.trim())) {
+      // Check if course already exists in student record (case-insensitive)
+      const studentCourses = studentRecord.course 
+        ? studentRecord.course.split(",").map((c: string) => c.trim().toLowerCase()) 
+        : [];
+        
+      if (!studentCourses.includes(course.trim().toLowerCase())) {
           studentRecord.course = studentRecord.course ? `${studentRecord.course}, ${course.trim()}` : course.trim();
       }
-      if (!studentRecord.courseCode.includes(courseCode)) {
+      
+      const studentCourseCodes = studentRecord.courseCode 
+        ? studentRecord.courseCode.split(",").map((c: string) => c.trim()) 
+        : [];
+        
+      if (!studentCourseCodes.includes(courseCode)) {
           studentRecord.courseCode = studentRecord.courseCode ? `${studentRecord.courseCode}, ${courseCode}` : courseCode;
       }
+      
       if (email) studentRecord.email = email.trim();
       if (address) studentRecord.address = address.trim();
       await studentRecord.save();

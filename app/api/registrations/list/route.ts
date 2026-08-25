@@ -55,13 +55,16 @@ export async function DELETE(req: NextRequest) {
         // If the student has more than 1 course, just update the strings
         if (currentCourses.length > 1 || currentCourseCodes.length > 1) {
           
-          // Find the courseCode for the deleted course
-          const courseDoc = await Course.findOne({ title: reg.course.trim() });
+          // Find the courseCode for the deleted course (case-insensitive)
+          const safeRegCourseTitle = reg.course.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+          const courseDoc = await Course.findOne({ 
+            title: { $regex: new RegExp(`^${safeRegCourseTitle}$`, "i") } 
+          });
           const deletedCourseCode = courseDoc ? courseDoc.courseCode : "UNKNOWN";
 
-          // Filter out the deleted course and courseCode
+          // Filter out the deleted course (case-insensitive) and courseCode
           student.course = currentCourses
-            .filter((c: string) => c !== reg.course.trim())
+            .filter((c: string) => c.toLowerCase() !== reg.course.trim().toLowerCase())
             .join(", ");
             
           student.courseCode = currentCourseCodes
