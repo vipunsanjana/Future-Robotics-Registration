@@ -152,11 +152,13 @@ export async function generateRegistrationPdf(reg: Registration): Promise<jsPDF>
     doc.setFontSize(16);
     doc.text("Completion of Course Requirements", pageW / 2, 90, { align: "center" });
 
-    const requirements = [
-      "1. For the completion of this course students must have 80% attendance.",
-      "2. Students need to complete all the assignments, the final exam & Project on time.",
-      "3. Monthly course fee must be completed within the 1st week of the month.",
-    ];
+  const requirements = [
+    "1. For the completion of this course, students must maintain at least 80% attendance.",
+    "2. Students must complete all assignments, the final examination, and the project on time.",
+    "3. Monthly course fees must be paid within the first week of each month.",
+    "4. Every 8 days will be considered one month for course fee purposes.",
+    "5. Students who fail to make the payment within the given period will be removed from the course."
+  ];
 
     let ry = 140;
     doc.setFont("helvetica", "normal");
